@@ -1,6 +1,6 @@
 #![allow(clippy::upper_case_acronyms)]
 use crate::macos::keyboard::Keyboard;
-use crate::rdev::{Button, Event, EventType};
+use crate::rdev::{Button, Event, EventType,Key};
 use cocoa::base::id;
 use core_graphics::event::{CGEvent, CGEventFlags, CGEventTapLocation, CGEventType, EventField};
 use lazy_static::lazy_static;
@@ -91,6 +91,40 @@ pub unsafe fn convert(
     cg_event: &CGEvent,
     keyboard_state: &mut Keyboard,
 ) -> Option<Event> {
+    /*
+        pub struct CGEventFlags: u64 {
+        const CGEventFlagNull = 0;
+
+        // Device-independent modifier key bits.
+        const CGEventFlagAlphaShift = 0x00010000;
+        const CGEventFlagShift = 0x00020000;
+        const CGEventFlagControl = 0x00040000;
+        const CGEventFlagAlternate = 0x00080000;
+        const CGEventFlagCommand = 0x00100000;
+
+        // Special key identifiers.
+        const CGEventFlagHelp = 0x00400000;
+        const CGEventFlagSecondaryFn = 0x00800000;
+
+        // Identifies key events from numeric keypad area on extended keyboards.
+        const CGEventFlagNumericPad = 0x00200000;
+
+        // Indicates if mouse/pen movement events are not being coalesced
+        const CGEventFlagNonCoalesced = 0x00000100;
+    }
+     */
+  
+    let flags = cg_event.get_flags().bits();
+
+    /*  
+    if !cg_event.get_flags().is_empty() { 
+        if cg_event.get_flags().contains(CGEventFlags::CGEventFlagShift) {
+            println!("Shift was down! :{:?}, {:?}", flags,cg_event.get_flags());
+
+        }
+    }
+    */
+    
     let option_type = match _type {
         CGEventType::LeftMouseDown => Some(EventType::ButtonPress(Button::Left)),
         CGEventType::LeftMouseUp => Some(EventType::ButtonRelease(Button::Left)),
@@ -146,6 +180,7 @@ pub unsafe fn convert(
             event_type,
             time: SystemTime::now(),
             name,
+            flags
         });
     }
     None

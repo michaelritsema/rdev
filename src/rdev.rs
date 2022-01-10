@@ -264,6 +264,7 @@ pub struct Event {
     pub time: SystemTime,
     pub name: Option<String>,
     pub event_type: EventType,
+    pub flags:u64 // CGEventFlags from core-graphics, mac only
 }
 
 /// We can define a dummy Keyboard, that we will use to detect
