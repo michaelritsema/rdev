@@ -211,6 +211,11 @@ pub enum Key {
     Unknown(u32),
 }
 
+impl Default for Key {
+    fn default() -> Self {
+        return Key::Unknown(0)
+    }
+}
 /// Standard mouse buttons
 /// Some mice have more than 3 buttons. These are not defined, and different
 /// OSs will give different `Button::Unknown` values.
