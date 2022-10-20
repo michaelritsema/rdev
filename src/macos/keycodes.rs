@@ -82,6 +82,16 @@ const KEY_M: CGKeyCode = 46;
 const COMMA: CGKeyCode = 43;
 const DOT: CGKeyCode = 47;
 const SLASH: CGKeyCode = 44;
+const KP_0: CGKeyCode = 82;
+const KP_1: CGKeyCode = 83;
+const KP_2: CGKeyCode= 84;
+const KP_3: CGKeyCode= 85;
+const KP_4: CGKeyCode = 86;
+const KP_5: CGKeyCode= 87;
+const KP_6: CGKeyCode = 88;
+const KP_7: CGKeyCode= 89;
+const KP_8: CGKeyCode= 90;
+const KP_9: CGKeyCode= 91;
 
 pub fn code_from_key(key: Key) -> Option<CGKeyCode> {
     match key {
@@ -163,6 +173,17 @@ pub fn code_from_key(key: Key) -> Option<CGKeyCode> {
         Key::Slash => Some(SLASH),
         Key::Function => Some(FUNCTION),
         Key::Unknown(code) => code.try_into().ok(),
+        //my custom
+        Key::Kp0 => Some(KP_0),
+        Key::Kp1 => Some(KP_1),
+        Key::Kp2 => Some(KP_2),
+        Key::Kp3 => Some(KP_3),
+        Key::Kp4 => Some(KP_4),
+        Key::Kp5 => Some(KP_5),
+        Key::Kp6 => Some(KP_6),
+        Key::Kp7 => Some(KP_7),
+        Key::Kp8 => Some(KP_8),
+        Key::Kp9 => Some(KP_9),
         _ => None,
     }
 }
@@ -246,6 +267,16 @@ pub fn key_from_code(code: CGKeyCode) -> Key {
         DOT => Key::Dot,
         SLASH => Key::Slash,
         FUNCTION => Key::Function,
+        KP_0 => Key::Kp0,
+        KP_1 => Key::Kp1,
+        KP_2 => Key::Kp2,
+        KP_3 => Key::Kp3,
+        KP_4 => Key::Kp4,
+        KP_5 => Key::Kp5,
+        KP_6 => Key::Kp6,
+        KP_7 => Key::Kp7,
+        KP_8 => Key::Kp8,
+        KP_9 => Key::Kp9,
         code => Key::Unknown(code.into()),
     }
 }
