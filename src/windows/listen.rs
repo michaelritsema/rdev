@@ -32,6 +32,7 @@ unsafe extern "system" fn raw_callback(code: c_int, param: WPARAM, lpdata: LPARA
                 event_type,
                 time: SystemTime::now(),
                 name,
+                flags: 0
             };
             if let Some(callback) = &mut GLOBAL_CALLBACK {
                 callback(event);
