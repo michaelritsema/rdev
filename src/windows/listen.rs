@@ -19,21 +19,7 @@ impl From<HookError> for ListenError {
 
 unsafe extern "system" fn raw_callback(code: c_int, param: WPARAM, lpdata: LPARAM) -> LRESULT {
     if code == HC_ACTION {
-        let opt = convert(param, lpdata);
-        if let Some(event_type) = opt {
-            let name = match &event_type {
-                EventType::KeyPress(_key) => match (*KEYBOARD).lock() {
-                    Ok(mut keyboard) => keyboard.get_name(lpdata),
-                    Err(_) => None,
-                },
-                _ => None,
-            };
-            let event = Event {
-                event_type,
-                time: SystemTime::now(),
-                name,
-                flags: 0
-            };
+        if let Some(event) = convert(param, lpdata) {
             if let Some(callback) = &mut GLOBAL_CALLBACK {
                 callback(event);
             }
@@ -50,7 +36,6 @@ where
         GLOBAL_CALLBACK = Some(Box::new(callback));
         set_key_hook(raw_callback)?;
         set_mouse_hook(raw_callback)?;
-
         GetMessageA(null_mut(), null_mut(), 0, 0);
     }
     Ok(())

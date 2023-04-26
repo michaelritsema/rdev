@@ -6,6 +6,7 @@ use std::convert::TryInto;
 use std::os::raw::{c_int, c_short};
 use std::ptr::null_mut;
 use std::sync::Mutex;
+use std::time::SystemTime;
 use winapi::shared::minwindef::{DWORD, HIWORD, LPARAM, LRESULT, WORD, WPARAM};
 use winapi::shared::ntdef::LONG;
 use winapi::shared::windef::HHOOK;
@@ -14,7 +15,7 @@ use winapi::um::winuser::{
     SetWindowsHookExA, KBDLLHOOKSTRUCT, MSLLHOOKSTRUCT, WHEEL_DELTA, WH_KEYBOARD_LL, WH_MOUSE_LL,
     WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONUP,
     WM_MOUSEHWHEEL, WM_MOUSEMOVE, WM_MOUSEWHEEL, WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN,
-    WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP,
+    WM_SYSKEYUP, WM_XBUTTONDOWN, WM_XBUTTONUP, LPKBDLLHOOKSTRUCT, GetKeyState, VK_SHIFT, VK_CONTROL, VK_MENU,
 };
 pub const TRUE: i32 = 1;
 pub const FALSE: i32 = 0;
@@ -48,7 +49,8 @@ pub unsafe fn get_button_code(lpdata: LPARAM) -> WORD {
     HIWORD(mouse.mouseData)
 }
 
-pub unsafe fn convert(param: WPARAM, lpdata: LPARAM) -> Option<EventType> {
+pub unsafe fn convert(param: WPARAM, lpdata: LPARAM) -> Option<crate::Event> {
+    let event_type = 
     match param.try_into() {
         Ok(WM_KEYDOWN) | Ok(WM_SYSKEYDOWN) => {
             let code = get_code(lpdata);
@@ -96,7 +98,54 @@ pub unsafe fn convert(param: WPARAM, lpdata: LPARAM) -> Option<EventType> {
             })
         }
         _ => None,
+    };
+
+    if let Some(event_type) = event_type {
+        let name = match &event_type {
+            EventType::KeyPress(_key) => match (*KEYBOARD).lock() {
+                Ok(mut keyboard) => keyboard.get_name(lpdata),
+                Err(_) => None,
+            },
+            _ => None,
+        };
+        let name = match &event_type {
+            EventType::KeyPress(_key) => match (*KEYBOARD).lock() {
+                Ok(mut keyboard) => keyboard.get_name(lpdata),
+                Err(_) => None,
+            },
+            _ => None,
+        };
+
+        let lptkb = lpdata as LPKBDLLHOOKSTRUCT;
+        let kb = unsafe { *lptkb};
+
+        let shift_pressed = unsafe { GetKeyState(VK_SHIFT)} < 0;
+        let alt_pressed = unsafe { GetKeyState(VK_MENU)} < 0;
+        let ctrl_pressed = unsafe { GetKeyState(VK_CONTROL)} < 0;
+   
+        let mut mod_flags:u64 = 0;
+        if shift_pressed {
+            mod_flags |= 1;
+        }
+        if alt_pressed {
+            mod_flags |= 2;
+        }
+
+        if ctrl_pressed {
+            mod_flags |= 4;
+        }
+
+        let event = crate::Event {
+            event_type,
+            time: SystemTime::now(),
+            name,
+            flags: mod_flags //kb.flags as u64
+            
+        };
+        return Some(event);
     }
+    None
+  
 }
 
 type RawCallback = unsafe extern "system" fn(code: c_int, param: WPARAM, lpdata: LPARAM) -> LRESULT;
