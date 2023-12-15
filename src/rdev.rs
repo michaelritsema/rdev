@@ -225,9 +225,34 @@ pub enum Button {
     Left,
     Right,
     Middle,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
     Unknown(u8),
 }
 
+impl Button {
+    pub fn from_integer_value(button_id: i64) -> Self{
+        match button_id {
+            2 => Button::Two,
+            3 => Button::Three,
+            4 => Button::Four,
+            5 => Button::Five,
+            6 => Button::Six,
+            7 => Button::Seven,
+            8 => Button::Eight,
+            9 => Button::Nine,
+            10 => Button::Ten,
+            _ => Button::Unknown(button_id as u8)
+        }
+    }
+}
 /// In order to manage different OSs, the current EventType choices are a mix and
 /// match to account for all possible events.
 #[derive(Debug, Copy, Clone, PartialEq)]

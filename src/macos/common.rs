@@ -49,6 +49,8 @@ pub const kCGEventMaskForAllEvents: u64 = (1 << CGEventType::LeftMouseDown as u6
     + (1 << CGEventType::MouseMoved as u64)
     + (1 << CGEventType::LeftMouseDragged as u64)
     + (1 << CGEventType::RightMouseDragged as u64)
+    + (1 << CGEventType::OtherMouseDown as u64)
+    + (1 << CGEventType::OtherMouseUp as u64)
     + (1 << CGEventType::KeyDown as u64)
     + (1 << CGEventType::KeyUp as u64)
     + (1 << CGEventType::FlagsChanged as u64)
@@ -130,6 +132,14 @@ pub unsafe fn convert(
         CGEventType::LeftMouseUp => Some(EventType::ButtonRelease(Button::Left)),
         CGEventType::RightMouseDown => Some(EventType::ButtonPress(Button::Right)),
         CGEventType::RightMouseUp => Some(EventType::ButtonRelease(Button::Right)),
+        CGEventType::OtherMouseDown => { 
+            let button_id = cg_event.get_integer_value_field(EventField::MOUSE_EVENT_BUTTON_NUMBER);
+            Some(EventType::ButtonPress(Button::from_integer_value(button_id)))
+        },
+        CGEventType::OtherMouseUp => { 
+            let button_id = cg_event.get_integer_value_field(EventField::MOUSE_EVENT_BUTTON_NUMBER);
+            Some(EventType::ButtonRelease(Button::from_integer_value(button_id)))
+        }
         CGEventType::MouseMoved => {
             let point = cg_event.location();
             Some(EventType::MouseMove {
